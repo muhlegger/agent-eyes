@@ -1,0 +1,11 @@
+{
+  "widths": ["1280", "390"],
+  "login": {
+    "path": "/login.html",
+    "fields": {
+      "input[type=email]": "demo@example.com",
+      "input[type=password]": "${DEMO_PASSWORD}"
+    },
+    "submit": "button[type=submit]"
+  }
+}

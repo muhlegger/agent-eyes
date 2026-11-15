@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>layout shift demo</title>
+<style>body { font: 16px system-ui; margin: 0; padding: 32px; background: #f4efe7; } .card { width: 280px; padding: 14px; background: #fff; border: 1px solid #d8cfc3; border-radius: 10px; }</style>
+</head><body>
+  <h1>Shift</h1>
+  <div id="slot"></div>
+  <div class="card" id="buy">Buy button that moves</div>
+  <script>
+    // A banner arrives late and pushes everything down: the classic "I clicked the wrong thing" bug.
+    setTimeout(() => {
+      document.getElementById("slot").innerHTML = '<div style="height:160px;background:#e9dfd2;margin-bottom:16px">Late banner</div>';
+    }, 500);
+  </script>
+</body></html>

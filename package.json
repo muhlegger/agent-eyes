@@ -1,0 +1,16 @@
+{
+  "name": "agent-eyes",
+  "version": "0.2.0",
+  "description": "Screenshots and motion checks of a web app in one command, made for AI coding agents: logged in, at the widths you care about, with hover/click/scroll states, element crops, before/after and a frame strip of animations with glitch detection.",
+  "type": "module",
+  "bin": { "agent-eyes": "bin/agent-eyes.mjs" },
+  "files": ["bin", "src", "skill", "README.md", "LICENSE"],
+  "scripts": {
+    "test": "node test/run.mjs"
+  },
+  "dependencies": { "playwright": "1.61.1" },
+  "engines": { "node": ">=18.17" },
+  "repository": { "type": "git", "url": "https://github.com/muhlegger/agent-eyes.git" },
+  "keywords": ["screenshot", "playwright", "ai-agents", "claude-code", "visual-testing", "animation", "ui"],
+  "license": "MIT"
+}

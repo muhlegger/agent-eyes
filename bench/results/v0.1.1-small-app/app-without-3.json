@@ -1,0 +1,108 @@
+{
+  "duration_api_ms": 54140,
+  "stop_reason": "end_turn",
+  "session_id": "aa0c8104-69f2-42a2-a360-8fbdf659836d",
+  "total_cost_usd": 0.352484,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 23176,
+    "cache_read_input_tokens": 238980,
+    "output_tokens": 5960,
+    "output_tokens_details": {
+      "thinking_tokens": 1118
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23176,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 598,
+        "cache_read_input_tokens": 32589,
+        "cache_creation_input_tokens": 1841,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1841
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 5960,
+      "cacheReadInputTokens": 238980,
+      "cacheCreationInputTokens": 23176,
+      "webSearchRequests": 0,
+      "costUSD": 0.352484,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1118,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 23176,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I tested both screens in Chromium at 1280 px and 390 px, using real clicks and taps. I did not change the app. There are four problems:\n\n1. **Phone: the Overview table overflows the screen.** `.figures` has `min-width: 560px` and no scroll wrapper, so at 390 px the page grows to 592 px wide. The table's last column goes off-screen, and the header and notice no longer reach the right edge.\n2. **\"Show details\" freezes the page.** It builds and sorts 110,000 values on the main thread. That blocks the page for about 80 ms on desktop and about 320 ms on a phone-speed CPU. The panel's opening animation skips frames during the freeze.\n3. **The details panel flickers as it opens.** The animation fades the panel in, then back to 45% opacity and squeezes it to 82% width before it settles.\n4. **The listings page jumps after it loads.** The notice arrives about 0.6 s after the listings and pushes the grid down. The layout-shift score is 0.04 on desktop and 0.12 on phone, which is above Google's 0.1 \"good\" limit. The detail page shifts a little too (0.02).\n\nMinor: one listing says \"1 rooms\", and the arrow keys don't move between the Overview and Costs tabs.\n\n**Checked and fine:**\n- Sign-in.\n- Listings grid at both widths.\n- Opening a listing.\n- Back and forward buttons.\n- Loading a listing's URL directly.\n- The \"Listing not found\" page.\n- Show/Hide details: the button label changes, the panel hides, and the median and bars appear.\n- Switching tabs by click and by Tab+Enter.\n- Costs list layout at both widths.\n- Costs totals and percentages add up.\n- No console errors.",
+  "ttft_ms": 1134,
+  "type": "result",
+  "duration_ms": 87697,
+  "ttft_stream_ms": 711,
+  "time_to_request_ms": 121,
+  "first_content_frame_ms": 711,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "task": "app",
+  "arm": "without",
+  "run": 3,
+  "model": "claude-opus-5-5",
+  "effort": "high",
+  "wall_ms": 92226,
+  "exit": 0,
+  "cwd": "/tmp/ae-bench-1794778013860/app-without-3"
+}

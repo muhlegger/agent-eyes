@@ -1,0 +1,196 @@
+{
+  "app-without-1.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "Listings with one room show \"1 rooms\" on both pages",
+      "On /login, submitting before the script loads just reloads the login page"
+    ]
+  },
+  "app-with-first-3.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "\"Calculating…\" text never shows because the calculation runs on the main thread",
+      "Overview table cuts off \"Total cost to own\" and \"Status\" columns on phone"
+    ]
+  },
+  "app-advice-1.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "Clicking 'Sign in' before the page finishes loading just reloads the form"
+    ]
+  },
+  "app-without-2.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "\"Calculating…\" text never shows",
+      "Studio listing shows \"1 rooms\"",
+      "Browser tab title stays \"Lotline\" on every page",
+      "Going back to listings loses scroll position",
+      "Tabs and details button lack screen-reader state; arrow keys don't move between tabs",
+      "Tapping a card during the layout shift can open the wrong listing"
+    ]
+  },
+  "app-with-repeat-3.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "Show details panel first shows 'Calculating…' and pushes the tabs down",
+      "'Studio · 1 rooms' should say '1 room'",
+      "'m²' wraps onto its own line on the Av. Atlântica card on desktop",
+      "Overview table 'Status' column cut off on phone"
+    ]
+  },
+  "app-with-repeat-2.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "Notice banner full width on desktop while content below is narrower and centred, so edges misalign",
+      "A card says \"1 rooms\" (wrong plural)"
+    ]
+  },
+  "app-with-first-1.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "Studio card and detail subtitle read \"1 rooms\" (grammar)"
+    ]
+  },
+  "app-advice-3.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": []
+  },
+  "app-with-first-2.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "Total cost and Status columns cut off on phone (part of D1)",
+      "Phone layout shift score 0.124 rated poor (part of D4)"
+    ]
+  },
+  "app-without-3.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "A listing reads \"1 rooms\" (wrong plural)",
+      "Arrow keys don't move between the Overview and Costs tabs"
+    ]
+  },
+  "app-with-repeat-1.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "\"1 rooms\" grammar error on Alameda Santos card and detail page",
+      "Show/Hide details button changes width",
+      "Overview table fills only half width on desktop while Costs table fills full width",
+      "Panel shows \"Calculating…\" on open"
+    ]
+  },
+  "app-advice-2.json": {
+    "found": {
+      "D1": true,
+      "D2": true,
+      "D3": true,
+      "D4": true
+    },
+    "false_alarm": {
+      "C1": false,
+      "C2": false
+    },
+    "other_claims": [
+      "Signing in before the login page finishes loading just reloads the page (outside the two screens)"
+    ]
+  }
+}

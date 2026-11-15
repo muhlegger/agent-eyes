@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>agent-eyes demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>if (!document.cookie.includes("demo=1")) location.replace("/login.html");</script>
+<style>
+  body { font: 16px system-ui; margin: 0; padding: 32px; background: #f4efe7; color: #2b2622; }
+  .row { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; }
+  .card { width: 280px; height: 120px; background: #fff; border: 1px solid #d8cfc3; border-radius: 10px; padding: 14px; box-sizing: border-box; }
+  /* A glitch on purpose: shrinks and fades mid-way, then comes back. */
+  .card.glitchy { animation: squeeze 400ms ease; }
+  @keyframes squeeze { 0% { width: 280px; opacity: 1 } 40% { width: 200px; opacity: .3 } 100% { width: 280px; opacity: 1 } }
+  /* The same idea done right: a soft lift. */
+  .card.smooth { transition: transform 200ms ease, box-shadow 200ms ease; }
+  .card.smooth.up { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,.12); }
+  /* A side panel meant to slide open. In #snap the width transition is written, but the later rule on the
+     same element replaces the property list, so the width snaps in one frame while the text fades. */
+  .side { width: 0; overflow: hidden; height: 120px; background: #fff; border: 1px solid #d8cfc3; border-radius: 10px; box-sizing: border-box; opacity: 0; transition: width 250ms ease, opacity 250ms ease; }
+  .side.open { width: 240px; opacity: 1; }
+  .fade { transition: opacity 250ms ease; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid #b9ad9f; background: #fff; cursor: pointer; }
+  button:hover { background: #efe6da; }
+  input { font: inherit; padding: 8px; border: 1px solid #b9ad9f; border-radius: 8px; }
+</style></head>
+<body>
+  <h1>Demo</h1>
+  <button id="glitch">Glitchy animation</button>
+  <button id="smooth">Smooth animation</button>
+  <button id="open-snap">Open panel</button>
+  <button id="open-ok">Open panel (ok)</button>
+  <label style="margin-left:16px">Search <input data-field="search" placeholder="type here"></label>
+  <div class="row">
+    <div id="a" class="card">Card A</div>
+    <div id="b" class="card smooth">Card B</div>
+    <div id="snap" class="side fade">Panel</div>
+    <div id="ok" class="side">Panel</div>
+  </div>
+  <script>
+    document.getElementById("glitch").onclick = () => {
+      const c = document.getElementById("a");
+      c.classList.remove("glitchy"); void c.offsetWidth; c.classList.add("glitchy");
+      // and a main-thread freeze, the kind of jank you feel
+      setTimeout(() => { const t = performance.now(); while (performance.now() - t < 120) {} }, 150);
+    };
+    document.getElementById("open-snap").onclick = () => document.getElementById("snap").classList.toggle("open");
+    document.getElementById("open-ok").onclick = () => document.getElementById("ok").classList.toggle("open");
+    document.getElementById("smooth").onclick = () => document.getElementById("b").classList.toggle("up");
+  </script>
+</body></html>

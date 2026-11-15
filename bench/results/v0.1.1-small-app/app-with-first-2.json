@@ -1,0 +1,108 @@
+{
+  "duration_api_ms": 24282,
+  "stop_reason": "end_turn",
+  "session_id": "11522802-ec76-4f72-9e30-aaf7917389b3",
+  "total_cost_usd": 0.2458334,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 20384,
+    "cache_read_input_tokens": 175547,
+    "output_tokens": 2379,
+    "output_tokens_details": {
+      "thinking_tokens": 405
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20384,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 634,
+        "cache_read_input_tokens": 29065,
+        "cache_creation_input_tokens": 2573,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2573
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 2379,
+      "cacheReadInputTokens": 175547,
+      "cacheCreationInputTokens": 20384,
+      "webSearchRequests": 0,
+      "costUSD": 0.2458334,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 405,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 20384,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found four problems, three on the detail page and one on both screens. I checked with agent-eyes at 1280 and 390 px, plus a read of the shipped JS/CSS. I didn't modify the app.\n\n**Problems**\n1. **\"Show details\" panel animation glitches** (both widths): halfway through, the panel shrinks sideways (1052\u2192864 px) and fades to 45% opacity, then comes back. The cause is the `details-in` keyframes at 50% (`scaleX(.82)`, `opacity:.45`).\n2. **Page freezes for about 80 ms when opening the panel**: the 110,000-sample calculation runs on the main thread during the animation.\n3. **Overview table is wider than the phone screen**: `.figures { min-width: 560px }` makes the whole page scroll sideways by 202 px at 390 px. The \"Total cost\" and \"Status\" columns are cut off.\n4. **Content jumps down after load** on both screens: the notice banner arrives late and pushes the page down 68 px on desktop and 111 px on phone. On phone that rates as poor (shift score 0.124, over Google's 0.1).\n\n**Checked and fine**\n- Listings grid layout at both widths, card hover lift, and clicking a card into its detail page.\n- Detail header and panel content (median and bars) after loading.\n- \"Hide details\" closes the panel and resets the button label.\n- Overview/Costs tab switching: the fade has no glitches, and the Costs list fits at 390 px.\n- No page errors or server errors.",
+  "ttft_ms": 1307,
+  "type": "result",
+  "duration_ms": 76846,
+  "ttft_stream_ms": 834,
+  "time_to_request_ms": 109,
+  "first_content_frame_ms": 834,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "task": "app",
+  "arm": "with-first",
+  "run": 2,
+  "model": "claude-opus-5-5",
+  "effort": "high",
+  "wall_ms": 81367,
+  "exit": 0,
+  "cwd": "/tmp/ae-bench-1794778013860/app-with-first-2"
+}
