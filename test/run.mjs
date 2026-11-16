@@ -62,7 +62,7 @@ try {
     { want: ["glitch-1280-frames.png", "width shrank from 280", "flicker", "the browser froze"] });
   await check("keeps a smooth animation clean",
     ["smooth=/", "--widths", "1280", "--action", "click:#smooth", "--frames", "6", "--measure", "#b"],
-    { want: ["smooth-1280-frames.png", "no shrink, snap, flicker"], not: ["shrank", "flicker:", "froze"] });
+    { want: ["smooth-1280-frames.png", "no shrink, snap, flicker"], not: ["shrank", "flicker:", "! the browser froze"] });
   await check("flags a size that snaps in one frame while other things animate (a transition that does not apply)",
     ["snap=/", "--widths", "1280", "--action", "click:#open-snap", "--frames", "6", "--measure", "#snap"],
     { want: [/width jumped from \d+ to 240 px in a single frame/] });
@@ -86,6 +86,8 @@ try {
     ])],
     { want: ['missing@1280: this check failed (element "#does-not-exist" is not on the page', "fine-1280.png"] });
 
+  await check("flags a page that freezes while it animates", ["freeze=/freeze.html", "--widths", "1280", "--action", "click:#go", "--frames", "6", "--measure", "#box"],
+    { want: ["the browser froze for"] });
   await check("does not hang on a page that never stops polling, and says what it logged and failed to load",
     ["busy=/busy.html", "--widths", "1280"],
     { want: ["busy-1280.png", "keeps talking to the server", "console error: could not load the user's settings", "requests that failed: 404 /missing.js"] });

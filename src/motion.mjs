@@ -52,7 +52,14 @@ export async function recordMotion({ browser, context, page, action, measure, co
     cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
   });
   await cdp.send("Page.startScreencast", { format: "jpeg", quality: 85, everyNthFrame: 1 });
-  await page.waitForTimeout(150);
+  // While the screencast warms up, listen to the page at rest: if frames already arrive late with nothing
+  // animating, the machine is busy, and a late frame during the motion says nothing about the page.
+  const idleWorst = await page.evaluate(() => new Promise((done) => {
+    let last = performance.now(), worst = 0;
+    const end = last + 300;
+    const tick = (now) => { worst = Math.max(worst, now - last); last = now; now < end ? requestAnimationFrame(tick) : done(worst); };
+    requestAnimationFrame(tick);
+  }));
   frames.length = 0;
   await page.evaluate(() => window.__agentEyes.start());
   const t0 = Date.now() / 1000;
@@ -97,13 +104,22 @@ export async function recordMotion({ browser, context, page, action, measure, co
   // Jank from the page's own frame rhythm while animating, not from the screenshot intervals
   // (those include the cost of capturing).
   const animating = samples.filter((s) => s[7] > 0);
-  const worst = animating.slice(1).reduce((m, s, i) => Math.max(m, s[0] - animating[i][0]), 0);
+  const gaps = animating.slice(1).map((s, i) => s[0] - animating[i][0]);
+  const worst = Math.max(0, ...gaps);
+  const late = gaps.filter((g) => g > 50).length;
   lines.push(`motion: ${unique.length} distinct frames over ${span} ms`);
   if (!unique.length) {
     lines.push("  nothing moved after the action (no new frame): if a motion was expected, check that the action changed something");
     return { sheet, lines, glitch };
   }
-  if (worst > 50) warn(`the browser froze for ${Math.round(worst)} ms while animating (noticeable above ~50 ms)`);
+  // One late frame under 100 ms is as likely the machine as the page, and so is any late frame when the page
+  // was already stuttering at rest: say it without calling it a glitch. A long or repeated freeze is the page's.
+  if (worst > 50) {
+    const said = `the browser froze for ${Math.round(worst)} ms while animating (noticeable above ~50 ms)`;
+    if (idleWorst > 40) lines.push(`  ${said}, but frames were already ${Math.round(idleWorst)} ms apart before the action: the machine is busy, run again to be sure`);
+    else if (worst <= 100 && late === 1) lines.push(`  one frame took ${Math.round(worst)} ms while animating: a single late frame is usually the machine, not the page (run again if it matters)`);
+    else warn(said);
+  }
   if (target) {
     const label = measure;
     const flags = samples.map((s) => s[6]);
@@ -156,7 +172,7 @@ export async function recordMotion({ browser, context, page, action, measure, co
         const off = cur.find((s) => s[k] < lo || s[k] > hi);
         if (off) lines.push(`  ${name} position left the start-to-end path (${Math.round(off[k])} px; start ${Math.round(first[k])}, end ${Math.round(last[k])})`);
       }
-      if (!lines.slice(1).some((l) => !l.includes("was replaced"))) lines.push(`  "${label}": no shrink, snap, flicker, disappearance or detour`);
+      if (!lines.slice(1).some((l) => !/was replaced|the machine/.test(l))) lines.push(`  "${label}": no shrink, snap, flicker, disappearance or detour`);
     }
   }
   return { sheet, lines, glitch };

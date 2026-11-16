@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>agent-eyes demo: a freeze</title>
+<style>
+  body { font: 16px system-ui; margin: 0; padding: 32px; background: #f4efe7; color: #2b2622; }
+  #box { width: 120px; height: 80px; background: #c9622b; border-radius: 10px; transition: transform 600ms linear; }
+  #box.go { transform: translateX(300px); }
+</style></head>
+<body>
+  <button id="go">Move, and block the page twice on the way</button>
+  <div id="box"></div>
+  <script>
+    // A freeze on purpose: the script holds the page for 180 ms twice while the box slides.
+    const block = (ms) => { const end = performance.now() + ms; while (performance.now() < end); };
+    document.getElementById("go").onclick = () => {
+      document.getElementById("box").classList.add("go");
+      setTimeout(() => block(180), 120); setTimeout(() => block(180), 380);
+    };
+  </script>
+</body></html>
