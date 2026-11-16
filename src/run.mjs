@@ -51,8 +51,8 @@ export function report(r) {
   ].join("\n");
 }
 
-// How to run this package without a global install.
-export const NPX = "npx -y @muhlegger/agent-eyes";
+// How to run this package without a global install. Becomes the npm name once it is published there.
+export const NPX = "npx -y github:muhlegger/agent-eyes";
 
 /** Errors a user can act on, said plainly. */
 export function friendly(e) {

@@ -8,8 +8,8 @@ description: See a web app's UI after changing it - screenshots logged in at cho
 One shell command; images come back as file paths you can read, with their size and token cost, followed by
 text findings (layout shift, horizontal scroll, page errors, motion glitches).
 
-If `agent-eyes` is not on the PATH, run it as `npx -y @muhlegger/agent-eyes` with the same arguments
-(the first time, `npx -y @muhlegger/agent-eyes install` downloads the browser).
+If `agent-eyes` is not on the PATH, run it as `npx -y github:muhlegger/agent-eyes` with the same arguments
+(the first time, `npx -y github:muhlegger/agent-eyes install` downloads the browser).
 
 ## Work cheaply: one plan, text first, few images
 
