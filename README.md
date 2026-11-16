@@ -34,12 +34,13 @@ opens an image only when it has to.
 ## Quickstart (30 seconds)
 
 ```bash
-npm install -g github:muhlegger/agent-eyes
+npm install -g @muhlegger/agent-eyes
 agent-eyes install                       # downloads Chromium once (add --with-deps on a fresh Linux)
 agent-eyes http://localhost:3000 /settings --widths 1440,390
 ```
 
-(There is an unrelated `agent-eyes` package on npm: install from GitHub, as above.)
+Or without installing: `npx -y @muhlegger/agent-eyes http://localhost:3000 /settings`. (The package is `@muhlegger/agent-eyes`; the
+unscoped `agent-eyes` on npm is unrelated.)
 
 Then tell your agent it exists. Pick one:
 
@@ -63,6 +64,8 @@ visual change instead of writing a Playwright script. Prefer a plain file in one
   }
 }
 ```
+
+(Without a global install: `"command": "npx", "args": ["-y", "@muhlegger/agent-eyes", "mcp"]`.)
 
 In `.cursor/mcp.json` (Cursor), `~/.codeium/windsurf/mcp_config.json` (Windsurf) or your client's MCP
 settings. Three tools: `check_ui` (the whole check in one call, findings as text), `view_image` (open one
@@ -244,7 +247,7 @@ linhas e só abre imagem quando precisa.
   Desktop e outros) e o bloco do `AGENTS.md`. Roda na sua máquina; nada sai dela.
 
 ```bash
-npm install -g github:muhlegger/agent-eyes
+npm install -g @muhlegger/agent-eyes
 agent-eyes install
 agent-eyes http://localhost:3000 /configuracoes --widths 1536,375 --locale pt-BR
 ```
