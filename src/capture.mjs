@@ -11,7 +11,15 @@ import { diffImages, sideBySide } from "./combine.mjs";
 import { recordMotion } from "./motion.mjs";
 import { viewportFor } from "./config.mjs";
 
-const NAV = { waitUntil: "networkidle", timeout: 240000 };
+// Wait for the page to load, then for the network to go quiet, but only for so long: a page that keeps
+// talking to the server (polling, server-sent events, analytics) never goes quiet, and waiting for it
+// would hang the whole run. Returns false when it gave up waiting.
+const LOAD = { waitUntil: "load", timeout: 240000 };
+const IDLE_MS = 8000;
+async function open(page, url) {
+  await page.goto(url, LOAD);
+  return page.waitForLoadState("networkidle", { timeout: IDLE_MS }).then(() => true, () => false);
+}
 
 function nameOf(route, vars) {
   const m = route.match(/^([\w.-]+)=(\/.*)$/);
@@ -56,8 +64,8 @@ export async function capture(o) {
   async function logIn(context, out) {
     const p = await context.newPage();
     try {
-      // networkidle: forms of client-rendered apps only work once hydrated; a click before that does nothing.
-      await p.goto(base + (login.path ?? "/login"), NAV);
+      // network quiet: forms of client-rendered apps only work once hydrated; a click before that does nothing.
+      await open(p, base + (login.path ?? "/login"));
       if (onLogin(p)) {
         for (const [sel, value] of Object.entries(login.fields ?? {})) await p.fill(sel, String(value));
         await p.click(login.submit ?? 'button[type="submit"]');
@@ -101,18 +109,34 @@ export async function capture(o) {
         } catch {}
       });
       const page = await context.newPage();
-      const errors = [], failed = [];
+      const errors = [], failed = [], logged = [], refused = [];
+      const short = (url) => url.slice(base.length).split("?")[0] || "/";
       page.on("pageerror", (e) => errors.push(String(e.message).split("\n")[0].slice(0, 160)));
-      page.on("response", (r) => { if (r.status() >= 500 && r.url().startsWith(base)) failed.push(`${r.status()} ${r.url().slice(base.length) || "/"}`); });
+      // console.error is the app saying something is wrong; the browser's own "Failed to load resource" lines
+      // are left out because the requests below say the same with the path.
+      page.on("console", (m) => {
+        if (m.type() === "error" && !/^Failed to load resource/.test(m.text())) logged.push(m.text().split("\n")[0].slice(0, 160));
+      });
+      page.on("response", (r) => {
+        if (!r.url().startsWith(base)) return;
+        if (r.status() >= 500) failed.push(`${r.status()} ${short(r.url())}`);
+        else if (r.status() >= 400 && !/\/favicon\.ico$/.test(short(r.url()))) refused.push(`${r.status()} ${short(r.url())}`);
+      });
+      page.on("requestfailed", (r) => {
+        const why = r.failure()?.errorText ?? "";
+        if (r.url().startsWith(base) && !/ERR_ABORTED/.test(why)) refused.push(`${why.replace(/^net::/, "") || "failed"} ${short(r.url())}`);
+      });
       for (const s of shots.filter((x) => (x.widths ?? o.widths).includes(spec))) {
         try {
         const { actions, name, url } = s;
-        errors.length = 0; failed.length = 0;
-        await page.goto(base + url, NAV);
-        if (onLogin(page)) { await logIn(context, o.out); await page.goto(base + url, NAV); }
+        errors.length = 0; failed.length = 0; logged.length = 0; refused.length = 0;
+        const where = `${name}@${vp.label}`;
+        await page.emulateMedia({ colorScheme: s.colorScheme ?? null, reducedMotion: s.reducedMotion ? "reduce" : null });
+        let quiet = await open(page, base + url);
+        if (onLogin(page)) { await logIn(context, o.out); quiet = await open(page, base + url); }
+        if (!quiet) notes.push(`${where}: the page keeps talking to the server (polling or a stream), so it was captured ${IDLE_MS / 1000} s after load`);
         await page.mouse.move(0, 0); // the pointer stays where the previous check left it; a stale hover hides one
         await page.waitForTimeout(o.wait);
-        const where = `${name}@${vp.label}`;
         // Content that moved on its own after loading (not caused by input): the button that drops when an
         // image arrives, the table that pushes the footer. Read before the actions so they don't mix in.
         const shifts = await page.evaluate(() => window.__agentEyesShifts ?? []);
@@ -158,7 +182,9 @@ export async function capture(o) {
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
         if (overflow > 0) problems.push(`${where}: horizontal scroll of ${overflow}px`);
         if (errors.length) problems.push(`${where}: page error: ${errors.join(" | ")}`);
+        if (logged.length) problems.push(`${where}: console error: ${[...new Set(logged)].slice(0, 3).join(" | ")}`);
         if (failed.length) problems.push(`${where}: server errors: ${[...new Set(failed)].slice(0, 5).join(", ")}`);
+        if (refused.length) notes.push(`${where}: requests that failed: ${[...new Set(refused)].slice(0, 5).join(", ")}`);
         if (o.compare) {
           const before = path.join(o.compare, path.basename(final));
           if (!existsSync(before)) problems.push(`${where}: nothing to compare at ${before}`);

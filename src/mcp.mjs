@@ -14,8 +14,8 @@ const PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 
 const INSTRUCTIONS = `agent-eyes lets you see a web app's UI after changing it. Work cheaply:
 1. Put the whole check in ONE check_ui call: every screen, width and interaction, as a list of checks.
-2. Read the text first: overflow, content that jumps after load, page errors, failed actions and motion
-   glitches come back as text.
+2. Read the text first: overflow, content that jumps after load, page errors, console errors, failed actions and
+   motion glitches come back as text.
 3. Call view_image only for the images the text can't answer (does the layout look right), preferring crops.
    Each image is listed with its token cost.
 Actions are real (clicking Save saves): point it at a dev or test environment.`;
@@ -33,13 +33,17 @@ const CHECK = {
     measure: { type: "string", description: "With frames: the element that should move (the panel, the column), measured and cropped to. Defaults to element." },
     full: { type: "boolean", description: "The whole scrolling page instead of the first screen." },
     eachStep: { type: "boolean", description: "Also a screenshot after each action." },
+    colorScheme: { type: "string", enum: ["dark", "light"], description: "What the page sees in prefers-color-scheme. To check both themes, add the same route twice with different names." },
+    reducedMotion: { type: "boolean", description: "The page sees prefers-reduced-motion: reduce." },
   },
 };
 
 const TOOLS = [
   {
     name: "check_ui",
-    description: "Look at a running web app after a UI change: screenshots (logged in via agent-eyes.config.json, at the widths you ask, after clicks/hovers), plus findings as text: horizontal scroll, content that jumped after load, page errors, server 5xx, actions that missed, and animation glitches (shrink, snap, flicker, freeze). Returns image file paths with their token cost; open only the ones you need with view_image. Put every screen and interaction in one call.",
+    title: "Check a web UI after a change",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    description: "Look at a running web app after a UI change, before saying it is done. Opens each route in a real browser (Chromium; logged in via agent-eyes.config.json), at the widths you ask, runs your clicks and hovers, and returns text: horizontal scroll, content that jumped after load, page errors, console errors, failed requests, server 5xx, actions that missed, and animation glitches (shrink, snap, flicker, freeze). Also writes PNG screenshots to disk and lists their paths with the token cost of each; nothing is sent as an image until you call view_image. Actions are real (clicking Save saves), so point it at a dev or test environment. Put every screen and interaction in one call. To compare two existing PNG files without opening the app, use compare_images.",
     inputSchema: {
       type: "object",
       required: ["checks"],
@@ -58,16 +62,24 @@ const TOOLS = [
   },
   {
     name: "view_image",
-    description: "Open one PNG that check_ui or compare_images listed. Costs the tokens printed next to it, and it stays in your context: open only what the text findings can't answer.",
+    title: "Open one screenshot",
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    description: "Return one PNG file as an image, to look at what the text from check_ui or compare_images cannot answer (does the layout look right, is anything cut off). Reads the file and changes nothing. The image costs the tokens printed next to its path and stays in your context, so open few, and prefer crops. Fails with a readable message if the path is not a PNG.",
     inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string", description: "Path as printed by check_ui." } } },
   },
   {
     name: "compare_images",
-    description: 'Compare two PNG files pixel by pixel: "identical", or a side-by-side image with each changed region boxed in red, plus the regions as text.',
+    title: "Compare two screenshots",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    description: 'Compare two PNG files that already exist, pixel by pixel, without opening the app. Answers "identical" (nothing to look at), or writes one side-by-side PNG to `out` with each changed region boxed in red and returns the regions as text (size and position) with the token cost of that image. Use it for two files you already have, e.g. a design export against a screenshot; to compare a screen before and after your edit, check_ui with `compare` does the capture and the comparison in one call.',
     inputSchema: {
       type: "object",
       required: ["before", "after", "out"],
-      properties: { before: { type: "string" }, after: { type: "string" }, out: { type: "string", description: "Where to write the side-by-side PNG." } },
+      properties: {
+        before: { type: "string", description: "Path of the first PNG (shown on the left, labelled before)." },
+        after: { type: "string", description: "Path of the second PNG (shown on the right, labelled after)." },
+        out: { type: "string", description: "Path of the side-by-side PNG to write. Written only when the two differ; an existing file is replaced." },
+      },
     },
   },
 ];

@@ -6,7 +6,8 @@ description: See a web app's UI after changing it - screenshots logged in at cho
 # agent-eyes
 
 One shell command; images come back as file paths you can read, with their size and token cost, followed by
-text findings (layout shift, horizontal scroll, page errors, motion glitches).
+text findings (layout shift, horizontal scroll, page errors, console errors, requests that failed, motion
+glitches).
 
 If `agent-eyes` is not on the PATH, run it as `npx -y @muhlegger/agent-eyes` with the same arguments
 (the first time, `npx -y @muhlegger/agent-eyes install` downloads the browser).
@@ -37,7 +38,8 @@ agent-eyes http://localhost:3000 --plan '[
 ]' --var id=42
 ```
 
-Keys per check: `name route actions element measure frames full eachStep widths`. One browser and one
+Keys per check: `name route actions element measure frames full eachStep widths colorScheme reducedMotion`
+(`"colorScheme": "dark"` shows the dark theme; to check both themes, list the route twice with two names). One browser and one
 login serve them all. Ids: `{id}` + `--var id=...`; if you don't know one, start from a list page and
 `click:` into an item (`"route": "/orders", "actions": ["click:.order-card >> nth=0"]`).
 

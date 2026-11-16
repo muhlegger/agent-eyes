@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>agent-eyes demo: a busy page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body { font: 16px system-ui; margin: 0; padding: 32px; background: #f4efe7; color: #2b2622; }</style>
+<!-- A file that is not there, an error the app logs, and a poll that never stops: the network never goes quiet. -->
+<script src="/missing.js"></script>
+</head>
+<body>
+  <h1>A page that keeps polling</h1>
+  <p>It asks the server something five times a second, logs an error and loads a file that does not exist.</p>
+  <script>
+    console.error("could not load the user's settings");
+    setInterval(() => fetch("/shift.html").catch(() => {}), 200);
+  </script>
+</body></html>

@@ -6,12 +6,12 @@
     "url": "https://github.com/muhlegger/agent-eyes",
     "source": "github"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@muhlegger/agent-eyes",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "transport": {
         "type": "stdio"
       },

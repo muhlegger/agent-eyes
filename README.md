@@ -98,7 +98,8 @@ agent-eyes skill >> AGENTS.md
 | An animation or transition | it **shrank and came back**, **snapped** (a size that jumps in one frame: the transition is written but not running), **flickered**, **disappeared**, **left its path**, or the browser **froze** (above ~50 ms is felt) |
 | A page that loads data | which elements **jumped after load**, and by how much |
 | A layout | **horizontal scroll** on a phone, at every width you asked for |
-| Anything | **page errors**, **server 5xx**, **actions that missed** their target |
+| Anything | **page errors**, **console errors**, **requests that failed** (404, 5xx), **actions that missed** their target |
+| A theme | the same screen in **dark** or **light**, or with **reduced motion** (`--color-scheme dark`, `--reduced-motion`) |
 | A screen, compared with before | `identical` (nothing to open), or one image with **each changed region boxed in red**, listed as text |
 
 ![An animation as a frame strip: the card shrinks and fades mid-way](docs/frames-glitch.png)

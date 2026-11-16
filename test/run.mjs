@@ -86,6 +86,16 @@ try {
     ])],
     { want: ['missing@1280: this check failed (element "#does-not-exist" is not on the page', "fine-1280.png"] });
 
+  await check("does not hang on a page that never stops polling, and says what it logged and failed to load",
+    ["busy=/busy.html", "--widths", "1280"],
+    { want: ["busy-1280.png", "keeps talking to the server", "console error: could not load the user's settings", "requests that failed: 404 /missing.js"] });
+  await check("keeps a quiet page free of those notes", ["theme=/theme.html", "--widths", "1280", "-o", before],
+    { want: ["no console errors"], not: ["keeps talking", "requests that failed"] });
+  await check("shows the page in the dark theme when asked",
+    ["theme=/theme.html", "--widths", "1280", "--color-scheme", "dark", "--compare", before], { want: ["theme-1280-compare.png"] });
+  await check("and in the light theme otherwise", ["theme=/theme.html", "--widths", "1280", "--compare", before],
+    { want: ["identical to"] });
+
   // The MCP server (agent-eyes mcp): the same runner behind three tools, spoken as JSON-RPC over stdio.
   const child = spawn(process.execPath, [path.join(root, "bin", "agent-eyes.mjs"), "mcp"], { env, cwd: demo });
   const waiting = new Map();

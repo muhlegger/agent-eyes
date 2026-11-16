@@ -17,15 +17,19 @@ export async function runChecks(input) {
   const base = input.base ?? config.baseUrl ?? process.env.BASE_URL;
   if (!base) throw new Error('no base URL: pass it (http://localhost:3000), set BASE_URL or "baseUrl" in agent-eyes.config.json');
   const d = input.defaults ?? {};
-  const defaults = { actions: d.actions ?? [], element: d.element, measure: d.measure, frames: d.frames ?? 0, full: !!d.full, eachStep: !!d.eachStep };
+  const defaults = { actions: d.actions ?? [], element: d.element, measure: d.measure, frames: d.frames ?? 0, full: !!d.full, eachStep: !!d.eachStep,
+    colorScheme: d.colorScheme, reducedMotion: !!d.reducedMotion };
+  const SCHEMES = ["dark", "light"];
   const shots = (input.routes ?? []).map((route) => ({ ...defaults, route }));
   if (input.checks !== undefined && !Array.isArray(input.checks)) throw new Error("a plan is a JSON list of checks");
   for (const c of input.checks ?? []) {
     if (!c?.route) throw new Error(`a check has no "route": ${JSON.stringify(c)}`);
     const w = typeof c.widths === "string" ? c.widths.split(",") : c.widths?.map(String);
+    if (c.colorScheme && !SCHEMES.includes(c.colorScheme)) throw new Error(`colorScheme is "dark" or "light", not "${c.colorScheme}"`);
     shots.push({ ...defaults, ...c, actions: c.actions ?? [], eachStep: c.eachStep ?? c.each_step ?? false,
       route: c.name ? `${c.name}=${c.route}` : c.route, widths: w });
   }
+  if (defaults.colorScheme && !SCHEMES.includes(defaults.colorScheme)) throw new Error(`--color-scheme is dark or light, not "${defaults.colorScheme}"`);
   if (!shots.length) shots.push({ ...defaults, route: "/" });
   return capture({
     base, config, shots,
@@ -47,7 +51,7 @@ export function report(r) {
     ...r.files.map(describe),
     ...r.notes,
     ...r.motion,
-    r.problems.length ? `PROBLEMS:\n${r.problems.join("\n")}` : "no page errors, no server errors, no horizontal scroll, actions ok",
+    r.problems.length ? `PROBLEMS:\n${r.problems.join("\n")}` : "no page errors, no console errors, no server errors, no horizontal scroll, actions ok",
   ].join("\n");
 }
 

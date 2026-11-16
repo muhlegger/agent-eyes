@@ -41,6 +41,9 @@ Options
                             {"name":"panel","route":"/orders/{id}","actions":["click:text=Details"],
                              "frames":true,"measure":"#details","widths":["1280"]}]
                            keys: name route actions element measure frames full eachStep widths
+                                 colorScheme reducedMotion
+  --color-scheme <s>       dark or light: what the page sees in prefers-color-scheme (default: the browser's, light)
+  --reduced-motion         the page sees prefers-reduced-motion: reduce
   --wait <ms>              wait after loading (default 1200)
   --var name=value         fills {name} in routes (repeatable)
   --config <file>          project config (default ./agent-eyes.config.json): login, viewports, locale...
@@ -52,7 +55,8 @@ Options
 
 Actions are real: clicking "save" saves. Point it at a dev or test database.
 Output: one image per line with its size and what it costs an agent to read (~tokens, Claude's formula),
-then notes (comparisons, content that moved after load), motion notes, and problems (page errors, 5xx,
+then notes (comparisons, content that moved after load, requests that failed), motion notes, and problems
+(page errors, console errors, 5xx,
 horizontal scroll, big layout shifts, actions that did not find their target).`;
 
 const argv = process.argv.slice(2);
@@ -100,6 +104,8 @@ for (let i = 0; i < argv.length; i++) {
     case "--compare": o.compare = next(); break;
     case "--frames": o.frames = /^\d+$/.test(argv[i + 1] ?? "") ? Number(argv[++i]) : 10; break;
     case "--measure": o.measure = next(); break;
+    case "--color-scheme": o.colorScheme = next(); break;
+    case "--reduced-motion": o.reducedMotion = true; break;
     case "--plan": plan = next(); break;
     case "--wait": o.wait = Number(next()); break;
     case "--var": { const [k, ...v] = next().split("="); o.vars[k] = v.join("="); break; }
