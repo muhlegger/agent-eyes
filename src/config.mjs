@@ -14,8 +14,9 @@ const expand = (v) => (typeof v === "string"
   : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, expand(x)]))
   : v);
 
-export function loadConfig(file) {
-  const f = file ?? (existsSync("agent-eyes.config.json") ? "agent-eyes.config.json" : null);
+export function loadConfig(file, dir = ".") {
+  const own = path.resolve(dir, "agent-eyes.config.json");
+  const f = file ? path.resolve(dir, file) : existsSync(own) ? own : null;
   if (!f) return {};
   if (!existsSync(f)) throw new Error(`config not found: ${f}`);
   try {

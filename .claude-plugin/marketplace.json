@@ -1,0 +1,14 @@
+{
+  "name": "agent-eyes",
+  "owner": {
+    "name": "muhlegger",
+    "url": "https://github.com/muhlegger"
+  },
+  "plugins": [
+    {
+      "name": "agent-eyes",
+      "source": "./",
+      "description": "Lets Claude see the web UI it just changed: screenshots logged in at every width, and motion glitches, layout shift and overflow reported as text."
+    }
+  ]
+}

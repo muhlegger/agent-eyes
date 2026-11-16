@@ -1,13 +1,9 @@
 #!/usr/bin/env node
-import path from "node:path";
-import { chromium } from "playwright";
-import { capture } from "../src/capture.mjs";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { diffImages, sideBySide } from "../src/combine.mjs";
-import { loadConfig } from "../src/config.mjs";
-import { describe } from "../src/tokens.mjs";
+import { compareFiles } from "../src/combine.mjs";
+import { friendly, report, runChecks } from "../src/run.mjs";
 
 const HELP = `agent-eyes: screenshots and motion checks of a web app, in one command.
 
@@ -16,6 +12,7 @@ Usage
   agent-eyes [base-url] --plan '<json>' [options]   several checks, each with its own actions, in one call
   agent-eyes combine <before.png> <after.png> <out.png> [label A] [label B]
   agent-eyes skill         print the instructions file for AI agents (SKILL.md)
+  agent-eyes mcp           run as an MCP server over stdio (Cursor, Windsurf, Claude Desktop, ...)
   agent-eyes install       download the browser once (Chromium; add --with-deps on a fresh Linux)
 
   base-url   e.g. http://localhost:3000 (or "baseUrl" in agent-eyes.config.json)
@@ -71,23 +68,20 @@ if (argv[0] === "install") {
 }
 
 if (argv[0] === "skill") {
-  process.stdout.write(readFileSync(new URL("../skill/SKILL.md", import.meta.url), "utf8"));
+  process.stdout.write(readFileSync(new URL("../skills/agent-eyes/SKILL.md", import.meta.url), "utf8"));
+  process.exit(0);
+}
+
+if (argv[0] === "mcp") {
+  await (await import("../src/mcp.mjs")).serve();
   process.exit(0);
 }
 
 if (argv[0] === "combine") {
   const [, a, b, out, la, lb] = argv;
   if (!a || !b || !out) { console.error("usage: agent-eyes combine <before.png> <after.png> <out.png> [label A] [label B]"); process.exit(2); }
-  const browser = await chromium.launch();
-  try {
-    const d = await diffImages(browser, a, b);
-    if (!d.changedRatio && !d.sizeChanged) console.log("identical (no image written)");
-    else {
-      console.log(describe(await sideBySide(browser, a, b, out, la, lb, d.regions)));
-      console.log(`changed ${(d.changedRatio * 100).toFixed(1)}% of pixels in ${d.totalRegions} region(s), marked in red: ` +
-        d.regions.map((r) => `${r.width}x${r.height} at ${r.x},${r.y}`).join("; "));
-    }
-  } finally { await browser.close(); }
+  try { console.log(await compareFiles(a, b, out, la, lb)); }
+  catch (e) { console.error(`agent-eyes: ${friendly(e)}`); process.exit(2); }
   process.exit(0);
 }
 
@@ -123,40 +117,14 @@ for (let i = 0; i < argv.length; i++) {
 }
 
 try {
-  o.config = loadConfig(configFile);
-  o.base = base ?? o.config.baseUrl ?? process.env.BASE_URL;
-  if (!o.base) throw new Error("no base URL: pass it first (http://localhost:3000), set BASE_URL or \"baseUrl\" in the config");
-  if (!o.routes.length && !plan) o.routes.push("/");
-  o.out = path.resolve(o.out ?? o.config.out ?? "agent-eyes-out");
-  o.widths = widths ?? o.config.widths ?? ["1440", "390"];
-  o.locale ??= o.config.locale;
-  o.timezone ??= o.config.timezone;
-  o.vars = { ...(o.config.vars ?? {}), ...o.vars };
-  const defaults = { actions: o.actions, element: o.element, measure: o.measure, frames: o.frames, full: o.full, eachStep: o.eachStep };
-  o.shots = o.routes.map((route) => ({ ...defaults, route }));
-  if (plan) {
-    const list = JSON.parse(plan.trim().startsWith("[") ? plan : readFileSync(plan, "utf8"));
-    if (!Array.isArray(list)) throw new Error("--plan takes a JSON list of checks");
-    for (const c of list) {
-      if (!c.route) throw new Error(`a --plan check has no "route": ${JSON.stringify(c)}`);
-      const w = typeof c.widths === "string" ? c.widths.split(",") : c.widths?.map(String);
-      o.shots.push({ ...defaults, ...c, actions: c.actions ?? [], eachStep: c.eachStep ?? c.each_step ?? false,
-        route: c.name ? `${c.name}=${c.route}` : c.route, widths: w });
-    }
-  }
-  const r = await capture(o);
+  const { routes, vars, out, wait, compare, storageState, locale, timezone, waitForServer, ...defaults } = o;
+  const checks = plan && JSON.parse(plan.trim().startsWith("[") ? plan : readFileSync(plan, "utf8"));
+  const r = await runChecks({ base, routes, checks, defaults, widths, out, configFile, vars, compare, wait,
+    storageState, locale, timezone, waitForServer });
   if (json) console.log(JSON.stringify(r, null, 2));
-  else {
-    for (const f of r.files) console.log(describe(f));
-    if (r.notes.length) console.log(r.notes.join("\n"));
-    if (r.motion.length) console.log(r.motion.join("\n"));
-    console.log(r.problems.length ? `PROBLEMS:\n${r.problems.join("\n")}` : "no page errors, no server errors, no horizontal scroll, actions ok");
-  }
+  else console.log(report(r));
   process.exit(strict && (r.problems.length || r.glitch) ? 1 : 0);
 } catch (e) {
-  const msg = /Executable doesn't exist/.test(e.message)
-    ? "the browser is not installed yet: run `agent-eyes install` once (add `--with-deps` on a fresh Linux)"
-    : e.message;
-  console.error(`agent-eyes: ${msg}`);
+  console.error(`agent-eyes: ${friendly(e)}`);
   process.exit(2);
 }

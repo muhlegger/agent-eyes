@@ -80,6 +80,24 @@ export async function diffImages(browser, before, after) {
   }
 }
 
+/** Two image files compared on their own: the text an agent reads ("identical", or what changed and where). */
+export async function compareFiles(a, b, out, labelA, labelB) {
+  const { chromium } = await import("playwright");
+  const { describe } = await import("./tokens.mjs");
+  const browser = await chromium.launch();
+  try {
+    const d = await diffImages(browser, a, b);
+    if (!d.changedRatio && !d.sizeChanged) return "identical (no image written)";
+    return [
+      describe(await sideBySide(browser, a, b, out, labelA, labelB, d.regions)),
+      `changed ${(d.changedRatio * 100).toFixed(1)}% of pixels in ${d.totalRegions} region(s), marked in red: ` +
+        d.regions.map((r) => `${r.width}x${r.height} at ${r.x},${r.y}`).join("; "),
+    ].join("\n");
+  } finally {
+    await browser.close();
+  }
+}
+
 /** A grid of frames (base64 JPEG of the full viewport), each cropped to `crop` and captioned. */
 export function frameSheet(browser, frames, viewport, crop, out, maxWidth = 1600) {
   const { x, y, width, height } = crop;

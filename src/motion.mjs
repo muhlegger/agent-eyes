@@ -139,6 +139,9 @@ export async function recordMotion({ browser, context, page, action, measure, co
         }
         if (step < Math.max(24, 0.2 * Math.max(alive[at][k], alive[at - 1][k])) || step < 0.8 * total) continue;
         const from = Math.round(alive[at - 1][k]), to = Math.round(alive[at][k]);
+        // Across a browser freeze the frames in between were never drawn: a slide looks like a jump.
+        const gap = alive[at][0] - alive[at - 1][0];
+        if (gap > 50) { lines.push(`  ${name} went from ${from} to ${to} px across a ${Math.round(gap)} ms browser freeze: can't tell a snap from skipped frames (run again when the machine is less busy)`); continue; }
         if (anyAnimation) warn(`${name} jumped from ${from} to ${to} px in a single frame while other things animated: if it should slide, its transition is not running (often a later "transition:" rule on the same element replaces the property list)`);
         else lines.push(`  ${name} changed from ${from} to ${to} px instantly (nothing animated)`);
       }

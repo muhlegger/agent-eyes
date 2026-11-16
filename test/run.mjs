@@ -85,6 +85,50 @@ try {
       { name: "fine", route: "/" },
     ])],
     { want: ['missing@1280: this check failed (element "#does-not-exist" is not on the page', "fine-1280.png"] });
+
+  // The MCP server (agent-eyes mcp): the same runner behind three tools, spoken as JSON-RPC over stdio.
+  const child = spawn(process.execPath, [path.join(root, "bin", "agent-eyes.mjs"), "mcp"], { env, cwd: demo });
+  const waiting = new Map();
+  let buf = "", ids = 0, stray = "";
+  child.stdout.on("data", (d) => {
+    buf += d;
+    for (let i; (i = buf.indexOf("\n")) >= 0; buf = buf.slice(i + 1)) {
+      try { const m = JSON.parse(buf.slice(0, i)); waiting.get(m.id)?.(m); } catch { stray += buf.slice(0, i); }
+    }
+  });
+  const rpc = (method, params) => new Promise((ok) => {
+    const id = ++ids;
+    waiting.set(id, ok);
+    child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`);
+  });
+  const expect = (name, ok, detail) => {
+    console.log(`${ok ? "ok  " : "FAIL"} ${name}`);
+    if (!ok) { failures++; console.log(`     ${JSON.stringify(detail).slice(0, 600)}`); }
+  };
+  const init = await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "test", version: "0" } });
+  child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" })}\n`);
+  const list = await rpc("tools/list", {});
+  expect("mcp: initializes and lists its tools",
+    init.result?.protocolVersion === "2025-06-18" && init.result.capabilities.tools &&
+    ["check_ui", "view_image", "compare_images"].every((n) => list.result?.tools.some((x) => x.name === n && x.inputSchema)), [init, list]);
+  const run = await rpc("tools/call", { name: "check_ui", arguments: { baseUrl: base, out, checks: [
+    { name: "mcp", route: "/", actions: ["click:#glitch"], frames: 6, measure: "#a", widths: ["1280"] },
+    { route: "/shift.html", widths: ["390"] },
+  ] } });
+  const said = run.result?.content?.[0]?.text ?? "";
+  expect("mcp: check_ui runs several checks and answers in text (logged in from the project's config)",
+    !run.result?.isError && ["mcp-1280-frames.png", "width shrank from 280", "layout shifted after load"].every((w) => said.includes(w)), run);
+  const img = await rpc("tools/call", { name: "view_image", arguments: { path: path.join(out, "mcp-1280-frames.png") } });
+  expect("mcp: view_image hands back the image the agent asked for",
+    img.result?.content?.[0]?.type === "image" && img.result.content[0].data.startsWith("iVBOR"), img.result?.content?.[0]?.type);
+  const bad = await rpc("tools/call", { name: "check_ui", arguments: { projectDir: out, checks: [{ route: "/" }] } });
+  expect("mcp: a run that cannot start is a readable tool result, not a protocol error",
+    bad.result?.isError && bad.result.content[0].text.includes("no base URL"), bad);
+  const unknown = await rpc("resources/list", {});
+  expect("mcp: an unsupported method gets a proper error and nothing else is written to stdout",
+    unknown.error?.code === -32601 && !stray, [unknown, stray]);
+  child.stdin.end();
+  await new Promise((r) => child.on("close", r));
 } finally {
   server.close();
   rmSync(out, { recursive: true, force: true });

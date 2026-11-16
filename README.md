@@ -7,10 +7,12 @@ hovers) and hands back what is wrong **as text**: an animation that squeezes, fl
 content that jumps after load, a page that scrolls sideways on a phone. The agent reads a few lines and
 opens an image only when it has to.
 
-![The command, the findings the agent reads, and the frame strip of an animation](docs/hero.png)
-<sub>Output shortened. The frame strip is a real capture from the demo app.</sub>
+![An agent changes a panel, looks at it with agent-eyes, reads that the transition is not running, fixes it and checks again](docs/demo.gif)
+<sub>The tool lines and both frame strips are real output from the bundled demo page, shortened. The chat lines around them are staged.</sub>
 
 [Português abaixo](#em-português) · [Benchmark](docs/benchmark.md) · MIT · Node 18+ · local, no cloud
+
+**Use it from:** a shell command · a [Claude Code plugin](#claude-code) · an [MCP server](#cursor-windsurf-claude-desktop-any-mcp-client) for Cursor, Windsurf and others
 
 ## Why it's worth a try
 
@@ -25,8 +27,9 @@ opens an image only when it has to.
 - **Text first, images only when needed.** Every image an agent opens stays in its context and is
   re-read on every later step. agent-eyes prints each image's token cost, says `identical` when nothing
   changed, and boxes what did.
-- **Works with any agent that runs a shell.** Ships a skill for Claude Code and a block for `AGENTS.md`
-  (Codex, Cursor, Gemini CLI, ...). Only dependency: Playwright.
+- **Works with the agent you already use.** A Claude Code plugin, an MCP server (Cursor, Windsurf, Claude
+  Desktop, ...) and a block for `AGENTS.md` (Codex, Gemini CLI, ...). Only dependency: Playwright. Runs
+  locally, nothing leaves your machine.
 
 ## Quickstart (30 seconds)
 
@@ -34,13 +37,43 @@ opens an image only when it has to.
 npm install -g github:muhlegger/agent-eyes
 agent-eyes install                       # downloads Chromium once (add --with-deps on a fresh Linux)
 agent-eyes http://localhost:3000 /settings --widths 1440,390
-
-# teach your agent to use it
-mkdir -p .claude/skills/agent-eyes && agent-eyes skill > .claude/skills/agent-eyes/SKILL.md   # Claude Code
-agent-eyes skill >> AGENTS.md                                                                 # other agents
 ```
 
 (There is an unrelated `agent-eyes` package on npm: install from GitHub, as above.)
+
+Then tell your agent it exists. Pick one:
+
+### Claude Code
+
+```
+/plugin install agent-eyes --marketplace muhlegger/agent-eyes
+```
+
+On versions before 2.1.275: `/plugin marketplace add muhlegger/agent-eyes`, then
+`/plugin install agent-eyes@agent-eyes`. The plugin is one skill: Claude reaches for agent-eyes after a
+visual change instead of writing a Playwright script. Prefer a plain file in one project?
+`mkdir -p .claude/skills/agent-eyes && agent-eyes skill > .claude/skills/agent-eyes/SKILL.md`.
+
+### Cursor, Windsurf, Claude Desktop, any MCP client
+
+```json
+{
+  "mcpServers": {
+    "agent-eyes": { "command": "agent-eyes", "args": ["mcp"] }
+  }
+}
+```
+
+In `.cursor/mcp.json` (Cursor), `~/.codeium/windsurf/mcp_config.json` (Windsurf) or your client's MCP
+settings. Three tools: `check_ui` (the whole check in one call, findings as text), `view_image` (open one
+of the images it listed, only when needed) and `compare_images`. Images are never pushed into the
+conversation: the agent asks for the ones it wants, knowing what each costs.
+
+### Codex, Gemini CLI and other agents with a shell
+
+```bash
+agent-eyes skill >> AGENTS.md
+```
 
 ## What it catches
 
@@ -207,21 +240,28 @@ linhas e só abre imagem quando precisa.
   refazendo o login. Aqui o login fica num arquivo de configuração, uma vez.
 - **Texto primeiro:** cada imagem sai com o custo para o agente ler; "idêntico" quando nada mudou, e o que
   mudou marcado em vermelho.
-- **Funciona com qualquer agente que roda comandos:** traz a skill do Claude Code e o bloco do `AGENTS.md`.
+- **Funciona com o agente que você já usa:** plugin do Claude Code, servidor MCP (Cursor, Windsurf, Claude
+  Desktop e outros) e o bloco do `AGENTS.md`. Roda na sua máquina; nada sai dela.
 
 ```bash
 npm install -g github:muhlegger/agent-eyes
 agent-eyes install
 agent-eyes http://localhost:3000 /configuracoes --widths 1536,375 --locale pt-BR
-mkdir -p .claude/skills/agent-eyes && agent-eyes skill > .claude/skills/agent-eyes/SKILL.md
 ```
+
+Depois, conte ao seu agente que ela existe: no Claude Code, `/plugin install agent-eyes --marketplace
+muhlegger/agent-eyes`; no Cursor e em outros clientes MCP, o servidor `agent-eyes mcp` (configuração
+[acima](#cursor-windsurf-claude-desktop-any-mcp-client)); nos demais, `agent-eyes skill >> AGENTS.md`.
 
 ## Development
 
 ```bash
 npm install
-npm test                          # end to end on the demo app in examples/demo
+npm test                          # end to end on the demo app in examples/demo (command line and MCP server)
 node test/make-readme-images.mjs  # regenerates docs/*.png
+npm install --no-save gifenc pngjs && node test/make-demo-gif.mjs   # regenerates docs/demo.gif
 ```
+
+Ideas and bug reports are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 MIT license.
