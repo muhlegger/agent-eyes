@@ -10,6 +10,9 @@ opens an image only when it has to.
 ![An agent changes a panel, looks at it with agent-eyes, reads that the transition is not running, fixes it and checks again](docs/demo.gif)
 <sub>The tool lines and both frame strips are real output from the bundled demo page, shortened. The chat lines around them are staged.</sub>
 
+[![test](https://github.com/muhlegger/agent-eyes/actions/workflows/test.yml/badge.svg)](https://github.com/muhlegger/agent-eyes/actions/workflows/test.yml)
+[![npm](https://img.shields.io/npm/v/@muhlegger/agent-eyes)](https://www.npmjs.com/package/@muhlegger/agent-eyes)
+
 [Português abaixo](#em-português) · [Benchmark](docs/benchmark.md) · MIT · Node 18+ · local, no cloud
 
 **Use it from:** a shell command · a [Claude Code plugin](#claude-code) · an [MCP server](#cursor-windsurf-claude-desktop-any-mcp-client) for Cursor, Windsurf and others

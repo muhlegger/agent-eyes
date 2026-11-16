@@ -1,6 +1,6 @@
 {
   "name": "@muhlegger/agent-eyes",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Lets an AI coding agent see the web UI it just changed: screenshots logged in at every width, findings as text (motion glitches, layout shift, overflow), before/after diffs. One shell command, an MCP server, or a Claude Code plugin.",
   "type": "module",
   "bin": {
