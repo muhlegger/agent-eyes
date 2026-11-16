@@ -1,6 +1,6 @@
 {
   "name": "agent-eyes",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "See the web UI you just changed: screenshots logged in at every width, motion glitches, layout shift and overflow reported as text, before/after diffs. One command instead of a throwaway Playwright script.",
   "author": {
     "name": "muhlegger",
